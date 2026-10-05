@@ -12,7 +12,7 @@ class Database:
 
     def create_tables(self) -> None:
         query = '''
-            CREATE TABLE IF NOT EXISTS Remotes (
+            CREATE TABLE IF NOT EXISTS ESPs (
                 id INTEGER NOT NULL PRIMARY KEY,
                 mac VARCHAR(17) NOT NULL UNIQUE,
                 load_status BOOLENA,
@@ -23,31 +23,31 @@ class Database:
 
         # Migração: limpa MACs antigos gravados com espaços/quebra de linha (idempotente)
         self.__cursor.execute(
-            "UPDATE OR IGNORE Remotes "
+            "UPDATE OR IGNORE ESPs "
             "SET mac = UPPER(TRIM(mac, ' ' || char(9) || char(10) || char(13)))"
         )
         self.__connection.commit()
 
     def save_ctd(self, mac: str) -> None:
-        self.__cursor.execute('INSERT INTO Remotes(mac) VALUES (?)', (mac,))
+        self.__cursor.execute('INSERT INTO ESPs(mac) VALUES (?)', (mac,))
         self.__connection.commit()
 
     def find_remote_by_mac(self, mac: str) -> bool:
-        result = self.__cursor.execute('SELECT 1 FROM Remotes WHERE mac = ?', (mac,))
+        result = self.__cursor.execute('SELECT 1 FROM ESPs WHERE mac = ?', (mac,))
         return result.fetchone() is not None
         
-    def get_all_remotes(self) -> list:
-        query = 'SELECT id, mac, Timestamp FROM Remotes'
+    def get_all_ESPs(self) -> list:
+        query = 'SELECT id, mac, Timestamp FROM ESPs'
         result = self.__cursor.execute(query)
         return result.fetchall()
     
     def drop_database(self):
-        query = f"DELETE FROM Remotes"
+        query = f"DELETE FROM ESPs"
         self.__cursor.execute(query)
         self.__connection.commit()
 
 # database = Database('dev')
 # database.create_tables()
 # database.save_ctd('dwwdewdewwedwew')
-# print(database.get_all_remotes())
+# print(database.get_all_ESPs())
 # # print((database.find_remote_by_mac('dwedwedew')))

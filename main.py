@@ -16,7 +16,7 @@ from utils.system_log import *
 
 loader = Loader()
 
-def format_remote_table(data):
+def format_EPS_table(data):
     table = tabulate(
         data, 
         headers=["ID", "MAC", "Data/hora"], 
@@ -64,9 +64,9 @@ def menu():
         elif option == '2':
             clear()
             try:
-                remotes = loader.view_remotes()
+                EPSs = loader.view_EPSs()
                 print('ESPs\n')
-                format_remote_table(remotes)
+                format_EPS_table(EPSs)
 
             except Exception as e:
                 print(e)

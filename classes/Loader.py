@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from .Database import Database
 from utils.path_resolver import path_resolver
 from utils.clear import clear
-from utils.colors import BRIGHT_GREEN, BRIGHT_BLUE, RESET
+from utils.colors import BRIGHT_BLUE, RESET
 
 boot_path = path_resolver('BOOT')
 firmware_path = path_resolver('firmwares')
@@ -61,8 +61,8 @@ class Loader:
         ports = port_list.comports()
         print(ports)
 
-    def view_remotes(self):
-        return database.get_all_remotes()
+    def view_ESPs(self):
+        return database.get_all_ESPs()
 
     def delete_db(self):
         database.drop_database()
@@ -91,9 +91,6 @@ class Loader:
                 "--flash-mode", "dio",
                 "--flash-freq", "80m",
                 "--flash-size", "4MB",
-                "0x0000", f"{boot_path}/bootloader.bin",
-                "0x8000", f"{boot_path}/partitions.bin",
-                "0xe000", f"{boot_path}/boot_app0.bin",
                 "0x10000", f"{firmware_path}/{self.__current_firmware}"
             ]
 
@@ -129,7 +126,7 @@ class Loader:
             if mac is None:
                 return 'no_mac'
 
-            if not database.find_remote_by_mac(mac):
+            if not database.find_ESP_by_mac(mac):
                 self.save_mac(mac)
 
             return 'ok'
@@ -147,7 +144,7 @@ class Loader:
         ws = wb.active
         ws.title = 'ESPs'
         ws.append(['ID', 'MAC', 'Data e Hora'])
-        for row in self.view_remotes():
+        for row in self.view_ESPs():
             ws.append(list(row))
         wb.save(output_path)
         return output_path
