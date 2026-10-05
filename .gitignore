@@ -1,0 +1,45 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# PyInstaller (build e executáveis gerados)
+build/
+dist/
+*.exe
+*.manifest
+# O .spec normalmente deve ser versionado.
+# Se preferir ignorar, descomente a linha abaixo:
+# *.spec
+
+# Segredos e configurações locais
+.env
+.env.*
+!.env.example
+
+# Banco de dados local
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+database/*.db-journal
+
+# Ferramentas / editores / IDEs
+.codex/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs e temporários
+*.log
+*.tmp
