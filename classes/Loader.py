@@ -9,6 +9,7 @@ from .Database import Database
 from utils.path_resolver import path_resolver
 from utils.clear import clear
 from utils.colors import BRIGHT_BLUE, RESET
+import shutil
 
 boot_path = path_resolver('BOOT')
 firmware_path = path_resolver('firmwares')
@@ -22,9 +23,8 @@ class Loader:
         self.__port = None
         self.__current_firmware = None
         firmwares = self.show_saved_firmwares()
-        if not firmwares:
-            raise FileNotFoundError(f'Nenhum firmware .bin encontrado em {firmware_path}')
-        self.set_firmware(firmwares[-1])  # o mais recente
+        if firmwares:
+            self.set_firmware(firmwares[-1])  # o mais recente
 
     def list_devices(self) -> list:
         ports = port_list.comports()
@@ -42,6 +42,11 @@ class Loader:
             
     def show_saved_firmwares(self):
         files = [f for f in listdir(firmware_path) if f.lower().endswith('.bin')]
+
+        if len(files) == 0:
+            self.set_firmware(None)
+            return None
+
         return sorted(files, key=lambda f: [int(x) if x.isdigit() else x for x in re.split(r'(\d+)', f)])
 
     def set_firmware(self, firm):
@@ -91,6 +96,9 @@ class Loader:
                 "--flash-mode", "dio",
                 "--flash-freq", "80m",
                 "--flash-size", "4MB",
+                "0x0000", f"{boot_path}/bootloader.bin",
+                "0x8000", f"{boot_path}/partitions.bin",
+                "0xe000", f"{boot_path}/boot_app0.bin",
                 "0x10000", f"{firmware_path}/{self.__current_firmware}"
             ]
 
@@ -104,7 +112,11 @@ class Loader:
                 bufsize=1
             )
 
+            output_lines = []
+
             for line in processo.stdout:
+                output_lines.append(line)
+
                 if mac is None:
                     mac = self.get_mac(line)
 
@@ -115,11 +127,13 @@ class Loader:
 
                 elif "A fatal error occurred" in line:
                     processo.wait()
+                    print("".join(output_lines))
                     return 'error'
 
             codigo = processo.wait()
 
             if codigo != 0:
+                print("".join(output_lines))
                 print(f"\nProcesso finalizado com código: {codigo}")
                 return 'error'
 
@@ -149,5 +163,23 @@ class Loader:
         wb.save(output_path)
         return output_path
 
+    def add_firmware(self, source_path):
+        """Copia o firmware para a pasta do projeto. Retorna o nome do arquivo ou levanta exceção."""
+        if not os.path.isfile(source_path):
+            raise FileNotFoundError("Arquivo não encontrado.")
+
+        os.makedirs(firmware_path, exist_ok=True)
+
+        file_name = os.path.basename(source_path)
+        destination = os.path.join(firmware_path, file_name)
+
+        if os.path.exists(destination):
+            raise FileExistsError(f"Já existe um firmware chamado '{file_name}'.")
+
+        shutil.copy2(source_path, destination)
+        return file_name
+
+    def delete_firmware(self, firmware):
+        os.remove(f'{firmware_path}/{firmware}')
 
 
