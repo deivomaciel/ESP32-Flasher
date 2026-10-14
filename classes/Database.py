@@ -32,7 +32,7 @@ class Database:
         self.__cursor.execute('INSERT INTO ESPs(mac) VALUES (?)', (mac,))
         self.__connection.commit()
 
-    def find_remote_by_mac(self, mac: str) -> bool:
+    def find_ESP_by_mac(self, mac: str) -> bool:
         result = self.__cursor.execute('SELECT 1 FROM ESPs WHERE mac = ?', (mac,))
         return result.fetchone() is not None
         
@@ -50,4 +50,4 @@ class Database:
 # database.create_tables()
 # database.save_ctd('dwwdewdewwedwew')
 # print(database.get_all_ESPs())
-# # print((database.find_remote_by_mac('dwedwedew')))
+# # print((database.find_ESP_by_mac('dwedwedew')))
